@@ -1,12 +1,121 @@
 # ionic-angular-cookies
-show how ionic1 or ionic2 support cookies ,and dispaly the log,the server is base on node Express
 
-### story
-search internet,many people include me  get answer that ionic don't support cookies authentication,we must use request header instead of cookies.
+Demonstrates how to use cookies in Ionic hybrid apps (Ionic1 / Ionic2) and how to capture WebView HTTP logs. The backend is built with Node + Express.
 
-for my experience,the difficult work is that i can't catch cookie log,so i dont know is't been set in the webview,i write this article show how do i catch cookies log and the what server done.I write javascript code to start-up a server by Express,and build hybrid app by ionic1,the problem is only between webview depend on IOS and Android and the way how server set cookies(no business with ionic app version) ,I have tested on ios(simulator and  device) and and android(just device) ,both are work very well.
+## Background
 
-at last,we set up a gateway to set cookies by Nginx,it work good too.
+Many people have encountered problems with cookie-based authentication and therefore recommend using custom request headers instead. In my tests, WebView on both iOS and Android accepts cookies — the real challenge is capturing and inspecting the cookie-related request/response data.
+
+This project aims to:
+
+- provide an example Node + Express service to set and read cookies;
+- provide an Ionic (Ionic1) hybrid app that interacts with the service via AJAX;
+- demonstrate how to capture and verify `Set-Cookie` / `Cookie` exchanges at the WebView/network layer (Wireshark and screenshots included).
+
+## Key folders
+
+- `nodeServer/`: Express service with `/setCookies` and `/getCookies` endpoints.
+- `ionicApp/`: Ionic example application (Ionic1).
+- `ionicV8ReactApp/`: Ionic example application (Ionic React / Capacitor v8).
+- `logImg/`: capture screenshots and Wireshark logs proving cookie exchanges.
+
+
+**NOTE — The Environment and the following sections describe the Ionic1 example (`ionicApp`).**
+
+## Environment (example)
+
+- macOS Sierra 10.12.5
+- Xcode 8.3.3
+- Node v4.4.3
+- Ionic 2.1.18
+- Cordova 7.0.1
+
+Adjust versions to match your development environment.
+
+## Quick start
+
+1. Start the Node server
+
+```bash
+git clone https://github.com/wangjinyang/ionic-angular-cookies.git
+cd ionic-angular-cookies/nodeServer
+
+npm install
+node ./bin/www
+```
+
+The service listens on `http://localhost:3000` by default. Visit the root URL to see a basic response.
+
+2. Run the Ionic app
+
+```bash
+cd ../ionicApp
+npm install
+# Set the `server` variable in `ionicApp/www/app.js` to your machine IP, e.g. http://192.168.x.x:3000
+ionic state restore
+ionic build
+```
+
+- iOS: open `ionicApp/platforms/ios/cookies.xcodeproj` in Xcode and run on simulator/device.
+- Android: run `ionic run android` to deploy to a device.
+
+## How it works
+
+The app provides two buttons:
+
+- Set Cookie: calls `/setCookies`. The server responds with `Set-Cookie`, which the WebView should accept and store.
+- Get Cookie: calls `/getCookies`. The server reads cookies from the incoming request and returns them as JSON.
+
+Debug and verification methods:
+
+- Use Wireshark to capture request/response packets and inspect `Set-Cookie` and `Cookie` headers.
+- Inspect WebView console logs on iOS to see `Set-Cookie` details (see images under `logImg/ios`).
+- Compare with Android logs/screenshots under `logImg/android` (Crosswalk and non-Crosswalk tested).
+
+Conclusion based on the examples:
+
+- WebView on both iOS and Android can accept `Set-Cookie` from the server and include `Cookie` in subsequent requests, provided CORS and cookie attributes are configured correctly.
+
+## Notes & troubleshooting
+
+1) CORS and credentials
+
+When your app and server are on different origins, configure CORS properly. Example:
+
+```js
+res.header('Access-Control-Allow-Origin', '*');
+res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
+res.header('Access-Control-Allow-Credentials', true);
+```
+
+Note: if you use `Access-Control-Allow-Credentials: true`, `Access-Control-Allow-Origin` must not be `*`; set it to the specific origin.
+
+2) Cookie attributes
+
+Ensure the server sets appropriate `Path`, `Domain`, and `Expires`/`Max-Age`. Cross-origin cookies may be restricted by the WebView or platform policies.
+
+3) Packet capture
+
+Wireshark is a reliable way to confirm whether `Set-Cookie` and `Cookie` headers were actually transmitted on the network.
+
+## Change cookie values
+
+Modify the example cookie or behavior in `nodeServer/routes/index.js`.
+
+## License
+
+See the project `LICENSE` file at the repository root.
+
+---
+
+If you want, I can also:
+
+- translate this back to Chinese;
+- split the documentation into `docs/` with separate pages (Quick Start, Troubleshooting, Screenshots);
+- prepare a cleaned README.md suitable for GitHub project homepage.
+
+Tell me which one you prefer.
 
 ### environment
 
@@ -190,3 +299,10 @@ if cookie not work very well,you should check
 if question leave me issue
 
 ### if you benifit from my project,please give me a star,thank you
+
+
+## Ionic React / Capacitor v8
+
+I also created an Ionic React / Capacitor v8 version of the example, located in the `ionicV8ReactApp/` folder. The setup and functionality are similar to the Ionic1 version, but with modern React and Capacitor APIs.
+
+![image](https://github.com/wangjinyang/ionic-angular-cookies/blob/master/logImg/ionic-react-capacitor-v8.png?raw=true)
