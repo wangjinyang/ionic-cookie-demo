@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { IonButton } from "@ionic/react";
 import "./ExploreContainer.css";
 
-const server = "http://192.168.8.243:3000";
+const server = "http://[YOUR IP HERE ]:3000";
 
 interface ContainerProps {}
 
