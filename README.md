@@ -1,4 +1,4 @@
-# ionic-angular-cookies
+# ionic-cookies-demo
 
 Demonstrates how to use cookies in Ionic hybrid apps (Ionic1 / Ionic2) and how to capture WebView HTTP logs. The backend is built with Node + Express.
 
